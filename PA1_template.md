@@ -1,14 +1,7 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ## Assignment: Course Project 1
 
@@ -31,7 +24,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 **Loading and preprocessing the data**  
 Show any code that is needed to  
 1. Loads and procceessed the data (i.e. read.csv)  
-```{r loaddata}
+
+```r
 if(!file.exists("./data")){dir.create("./data")}
 fileURL <- "http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 download.file(fileURL, dest="Factivity.zip", mode="wb")
@@ -42,115 +36,177 @@ activity <- read.csv("activity.csv")
 **What is mean total number of steps taken per day?**  
 For this part of the assignment, you can ignore the missing values in the dataset.  
 1.	The total number of steps taken per day  
-```{r totalstepsperday}
+
+```r
 sumstepsperday <- aggregate(steps~date, activity, sum)
 ```
   
 2.	A histogram of the total number of steps taken each day
-```{r histogramofstepsperday}
+
+```r
 #png(file="histsumstepsperday.png")
 hist(sumstepsperday$steps, xlab = "Number of Steps", main="Total Number of Steps per Day")
+```
+
+![](PA1_template_files/figure-html/histogramofstepsperday-1.png)
+
+```r
 #dev.off()
 ```
   
 3a.	The mean of the total number of steps taken per day  
-``` {r meansteps}
+
+```r
 meanstepsperday <- aggregate(steps~date, activity, mean)
 meansteps <- mean(sumstepsperday$steps)
 print(meansteps)
 ```
-`r meansteps`
+
+```
+## [1] 10766.19
+```
+1.0766189\times 10^{4}
   
 3b.  The median of the total number of steps taken per day  
-``` {r mediansteps}
+
+```r
 medianstepsperday <- aggregate(steps~date, activity, median)
 mediansteps <- median(sumstepsperday$steps)
 print(mediansteps)
 ```
-`r mediansteps`
+
+```
+## [1] 10765
+```
+10765
   
 **What is the average daily activity pattern?**
 1.	A time series plot (i.e. type="l" ) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)   
-```{r meaninterval}
+
+```r
 meanintervalperday <- aggregate(steps~interval, activity, mean)
 #png(file="meanintervalperday.png")
 plot(meanintervalperday$interval, meanintervalperday$steps, type = "l", xlab = "Average 5-Minut Interval", ylab = "Average Steps per Day", main="Average Numbe of Steps per Day by Interval")
+```
+
+![](PA1_template_files/figure-html/meaninterval-1.png)
+
+```r
 #dev.off()
 ```
   
 2.	The 5-minute interval, averaged across all the days, with the maximum number of steps is
-```{r max_interval}
+
+```r
 max_interval <- meanintervalperday[which.max(meanintervalperday$steps),1]
 print(max_interval)
 ```
-`r max_interval`
+
+```
+## [1] 835
+```
+835
    
 **Imputing missing values**
 There are a number of days/intervals where there are missing values (coded as NA). The presence of missing days introduces bias into some calculations or summaries of the data.  
 
 1.	The total number of missing values (i.e. the total number of rows with NAs):  
-```{r countnas}
+
+```r
 nasteps <- sum(is.na(activity$steps))
 nadate <- sum(is.na(activity$date))
 nainterval <- sum(is.na(activity$interval))
 ```
-missing steps:  `r nasteps`  
-missing dates:  `r nadate`  
-missing intervals:  `r nainterval`  
+missing steps:  2304  
+missing dates:  0  
+missing intervals:  0  
   
 2.	A new dataset that is equal to the original dataset but with the missing data filled in with the average intervals per day.  
-```{r replacenas}
+
+```r
 activitynonas <- transform(activity, steps = ifelse(is.na(activity$steps), meanintervalperday$steps[match(activity$interval, meanintervalperday$interval)], activity$steps))
 ```
   
 3a.	A histogram of the total number of steps taken each day
-```{r histsumstepswomissingvalues}
+
+```r
 activitynonas[as.character(activitynonas$date) == "2012-10-01", 1] <- 0
 sumstepsperdaynonas <- aggregate(steps~date, activitynonas, sum)
 #png(file="sumstepsperdaynonas.png")
 hist(sumstepsperdaynonas$steps, xlab = "Number of Steps", main="Total Number of Steps per Day")
+```
+
+![](PA1_template_files/figure-html/histsumstepswomissingvalues-1.png)
+
+```r
 #dev.off()
 ```
   
   3b. The mean total number of steps taken per day is:  
-```{r meanwomissingvalues}
+
+```r
 meanstepsnonas <- mean(sumstepsperdaynonas$steps)
 print(meanstepsnonas)
 ```
-`r meanstepsnonas`
+
+```
+## [1] 10589.69
+```
+1.0589694\times 10^{4}
 
 The difference between the mean with missing values and the mean without missing values is:
-```{r meandiffwomissingvalues}
+
+```r
 meansteps <- mean(sumstepsperday$steps)
 meandiffnas <- meansteps - meanstepsnonas
 print(meandiffnas)
 ```
-`r meandiffnas`
+
+```
+## [1] 176.4949
+```
+176.4948964
 
 3c. The median total number of steps taken per day is:  
-```{r medianwomissingvalues}
+
+```r
 medianstepsnonas <- median(sumstepsperdaynonas$steps)
 medianstepsnonas
 ```
-`r medianstepsnonas`
+
+```
+## [1] 10766.19
+```
+1.0766189\times 10^{4}
 
 The difference between the median with missing values and the median without missing values is:
-```{r mediandiff}
+
+```r
 mediandiffnas <- medianstepsnonas - mediansteps
 print(mediandiffnas)
 ```
-`r mediandiffnas`
+
+```
+## [1] 1.188679
+```
+1.1886792
   
 3d.  The impact of imputing missing data on the estimates of the total daily number of steps is:
-```{r stepsdiffna}
+
+```r
 stepsdiffna = sum(sumstepsperdaynonas$steps) - sum(sumstepsperday$steps)
 print(stepsdiffna)
 ```
-`r stepsdiffna`
+
+```
+## [1] 75363.32
+```
+7.5363321\times 10^{4}
 
 **Are there differences in activity patterns between weekdays and weekends?**  
 1.	A new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.  
-```{r typedow}
+
+```r
 workdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 activitynonas$date <- as.Date(activitynonas$date)
 activitynonas$dow <- weekdays(activitynonas$date)
@@ -158,11 +214,17 @@ activitynonas$typedow = as.factor(ifelse(is.element(activitynonas$do,workdays),"
 ```
   
 2.	A panel plot containing a time series plot (i.e. type="l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).  
-```{r plottypedow}
+
+```r
 meanstepspertypedow <- aggregate(steps ~ interval + typedow, activitynonas, mean)
 library(ggplot2)
 #png(file="stepspertypedow.png")
 stepspertypedow_plot <- ggplot(data = meanstepspertypedow, aes(x=interval, y=steps))
 stepspertypedow_plot + geom_line()+facet_grid(typedow~.)+xlab("5 Minute Intervals")+ylab("Average Number of Steps")+ggtitle("Average Number of Steps per Day By Interval")
+```
+
+![](PA1_template_files/figure-html/plottypedow-1.png)
+
+```r
 #dev.off()
 ```
